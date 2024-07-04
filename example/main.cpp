@@ -36,11 +36,11 @@
 #include <SDL_opengl.h>
 #endif
 
-#include "ImGuizmo.h"
-#include "ImSequencer.h"
-#include "ImZoomSlider.h"
-#include "ImCurveEdit.h"
-#include "GraphEditor.h"
+#include <ImGuizmo.h>
+#include <ImSequencer.h>
+#include <ImZoomSlider.h>
+#include <ImCurveEdit.h>
+#include <GraphEditor.h>
 #include <math.h>
 #include <vector>
 #include <algorithm>

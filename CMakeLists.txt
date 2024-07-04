@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(imguizmo DESCRIPTION "Immediate mode 3D gizmo for scene editing and other controls based on Dear Imgui")
 
+find_package(imgui QUIET COMPONENTS imgui-core)
+
 option(BUILD_SHARED_LIBS "Build shared libs" OFF)
 
 # Create the main target
@@ -16,7 +18,7 @@ add_library(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:ImGuizmo.h>
     $<INSTALL_INTERFACE:GraphEditor.h>
     $<INSTALL_INTERFACE:ImCurveEdit.h>
@@ -24,6 +26,10 @@ target_include_directories(${PROJECT_NAME}
     $<INSTALL_INTERFACE:ImGuizmo.h>
     $<INSTALL_INTERFACE:ImSequencer.h>
     $<INSTALL_INTERFACE:ImZoomSlider.h>)
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        imgui-core)
 
 option(IMGUIZMO_BUILD_EXAMPLE "Build example" ON)
 if (${IMGUIZMO_BUILD_EXAMPLE})
