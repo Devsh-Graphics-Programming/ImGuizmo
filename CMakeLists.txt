@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 project(imguizmo DESCRIPTION "Immediate mode 3D gizmo for scene editing and other controls based on Dear Imgui")
 
-find_package(imgui QUIET COMPONENTS imgui-core)
+if(TARGET imgui)
+	set(EXT_IMGUI_TARGET imgui)
+else()
+	set(EXT_IMGUI_TARGET imgui-core)
+	find_package(imgui QUIET COMPONENTS ${EXT_IMGUI_TARGET})
+endif()
 
-option(BUILD_SHARED_LIBS "Build shared libs" OFF)
+set(BUILD_SHARED_LIBS OFF)
 
 # Create the main target
 add_library(${PROJECT_NAME} 
@@ -29,56 +34,60 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        imgui-core)
+        ${EXT_IMGUI_TARGET})
 
 option(IMGUIZMO_BUILD_EXAMPLE "Build example" ON)
 if (${IMGUIZMO_BUILD_EXAMPLE})
     add_subdirectory(example)
 endif()    
 
-# Export and install targets and headers
-include(GNUInstallDirs)
-set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+option(IMGUIZMO_INSTALL_TARGETS "Enable install & export of targets" OFF)
 
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+if(IMGUIZMO_INSTALL_TARGETS)
+	# Export and install targets and headers
+	include(GNUInstallDirs)
+	set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
-install(EXPORT ${PROJECT_NAME}-targets
-    FILE
-        ${PROJECT_NAME}Targets.cmake
-    NAMESPACE
-        ${PROJECT_NAME}::
-    DESTINATION
-        ${INSTALL_CONFIGDIR})
+	install(TARGETS ${PROJECT_NAME}
+		EXPORT ${PROJECT_NAME}-targets
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
-include(CMakePackageConfigHelpers)
+	install(EXPORT ${PROJECT_NAME}-targets
+		FILE
+			${PROJECT_NAME}Targets.cmake
+		NAMESPACE
+			${PROJECT_NAME}::
+		DESTINATION
+			${INSTALL_CONFIGDIR})
 
-configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-)
+	include(CMakePackageConfigHelpers)
 
-install(FILES 
-        GraphEditor.h
-        ImCurveEdit.h
-        ImGradient.h
-        ImGuizmo.h
-        ImSequencer.h
-        ImZoomSlider.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+	configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+		INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+	)
 
-# Install the config, configversion and custom find modules
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
+	install(FILES 
+			GraphEditor.h
+			ImCurveEdit.h
+			ImGradient.h
+			ImGuizmo.h
+			ImSequencer.h
+			ImZoomSlider.h
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
-export(EXPORT ${PROJECT_NAME}-targets
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::)
+	# Install the config, configversion and custom find modules
+	install(FILES
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+		DESTINATION ${INSTALL_CONFIGDIR}
+	)
 
-# Register package in user's package registry
-export(PACKAGE ${PROJECT_NAME})
+	export(EXPORT ${PROJECT_NAME}-targets
+		FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake
+		NAMESPACE ${PROJECT_NAME}::)
+
+	# Register package in user's package registry
+	export(PACKAGE ${PROJECT_NAME})
+endif()
